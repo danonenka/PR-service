@@ -4,7 +4,6 @@
 *.so
 *.dylib
 pr-service
-server
 
 *.test
 
