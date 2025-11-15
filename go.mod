@@ -1,4 +1,4 @@
-module pr-service-task
+module github.com/danonenka/PR-service
 
 go 1.24.0
 

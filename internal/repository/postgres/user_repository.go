@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	"pr-service-task/internal/domain"
+	"github.com/danonenka/PR-service/internal/domain"
 )
 
 type UserRepository struct {

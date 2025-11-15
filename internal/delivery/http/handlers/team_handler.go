@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"pr-service-task/internal/domain"
-	"pr-service-task/internal/usecase"
+	"github.com/danonenka/PR-service/internal/domain"
+	"github.com/danonenka/PR-service/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

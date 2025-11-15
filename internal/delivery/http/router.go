@@ -1,8 +1,8 @@
 package http
 
 import (
-	"pr-service-task/internal/delivery/http/handlers"
-	"pr-service-task/internal/usecase"
+	"github.com/danonenka/PR-service/internal/delivery/http/handlers"
+	"github.com/danonenka/PR-service/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )

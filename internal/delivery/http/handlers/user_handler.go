@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"net/http"
-	"pr-service-task/internal/usecase"
+	"github.com/danonenka/PR-service/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
 

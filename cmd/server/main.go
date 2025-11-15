@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	httphandler "pr-service-task/internal/delivery/http"
-	"pr-service-task/internal/repository/postgres"
-	"pr-service-task/internal/usecase"
+	httphandler "github.com/danonenka/PR-service/internal/delivery/http"
+	"github.com/danonenka/PR-service/internal/repository/postgres"
+	"github.com/danonenka/PR-service/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"

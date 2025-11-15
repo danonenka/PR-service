@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"pr-service-task/internal/domain"
+	"github.com/danonenka/PR-service/internal/domain"
 )
 
 type StatisticsUsecase struct {

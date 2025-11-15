@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"math/rand"
-	"pr-service-task/internal/domain"
+	"github.com/danonenka/PR-service/internal/domain"
 	"time"
 )
 
