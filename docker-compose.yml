@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pr-service-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pr_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pr-service-network
+
+  migrate:
+    image: migrate/migrate:v4.17.0
+    container_name: pr-service-migrate
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://postgres:postgres@postgres:5432/pr_service?sslmode=disable"
+      - "up"
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pr-service-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pr-service-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: pr_service
+      DB_SSLMODE: disable
+      PORT: 8080
+    volumes:
+      - ./openapi.yaml:/app/openapi.yaml:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - pr-service-network
+
+volumes:
+  postgres_data:
+
+networks:
+  pr-service-network:
+    driver: bridge
+
