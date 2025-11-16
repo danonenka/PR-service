@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	httphandler "github.com/danonenka/PR-service/internal/delivery/http"
 	"github.com/danonenka/PR-service/internal/repository/postgres"
 	"github.com/danonenka/PR-service/internal/usecase"
@@ -50,18 +51,18 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.Default()
-	
+
 	engine.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
-	
+
 	// Swagger UI
 	openapiPath := "/app/openapi.yaml"
 	if _, err := os.Stat("./openapi.yaml"); err == nil {
 		openapiPath = "./openapi.yaml"
 	}
 	engine.StaticFile("/swagger/openapi.yaml", openapiPath)
-	
+
 	// Swagger UI HTML
 	engine.GET("/swagger-ui", func(c *gin.Context) {
 		html := `<!DOCTYPE html>
@@ -89,7 +90,7 @@ func main() {
 </html>`
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 	})
-	
+
 	router.SetupRoutes(engine)
 
 	port := getEnv("PORT", "8080")
