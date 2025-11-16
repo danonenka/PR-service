@@ -1,8 +1,12 @@
 package usecase
 
 import (
+	"database/sql"
 	"errors"
+	"strings"
+
 	"github.com/danonenka/PR-service/internal/domain"
+	"github.com/google/uuid"
 )
 
 type TeamUsecase struct {
@@ -42,30 +46,33 @@ func (u *TeamUsecase) DeleteTeam(id string) error {
 }
 
 func (u *TeamUsecase) AddTeamWithMembers(teamName string, members []*domain.User) (*domain.Team, error) {
-	_, err := u.teamRepo.GetByName(teamName)
-	if err == nil {
-		return nil, errors.New("TEAM_EXISTS")
-	}
+	existingTeam, err := u.teamRepo.GetByName(teamName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			team := &domain.Team{
+				ID:   uuid.New().String(),
+				Name: teamName,
+			}
 
-	team := &domain.Team{
-		ID:   teamName,
-		Name: teamName,
-	}
-
-	if err := u.teamRepo.Create(team); err != nil {
-		if err.Error() == "pq: duplicate key value violates unique constraint \"teams_name_key\"" {
-			return nil, errors.New("TEAM_EXISTS")
+			if err := u.teamRepo.Create(team); err != nil {
+				if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+					return nil, errors.New("TEAM_EXISTS")
+				}
+				return nil, err
+			}
+			existingTeam = team
+		} else {
+			return nil, err
 		}
-		return nil, err
 	}
 
 	for _, member := range members {
-		member.TeamID = team.ID
+		member.TeamID = existingTeam.ID
 		existingUser, err := u.userRepo.GetByID(member.ID)
 		if err == nil && existingUser != nil {
 			existingUser.Name = member.Name
 			existingUser.IsActive = member.IsActive
-			existingUser.TeamID = team.ID
+			existingUser.TeamID = existingTeam.ID
 			if err := u.userRepo.Update(existingUser); err != nil {
 				return nil, err
 			}
@@ -76,7 +83,7 @@ func (u *TeamUsecase) AddTeamWithMembers(teamName string, members []*domain.User
 		}
 	}
 
-	return team, nil
+	return existingTeam, nil
 }
 
 func (u *TeamUsecase) GetTeamWithMembers(teamName string) (*domain.Team, []*domain.User, error) {
@@ -92,4 +99,3 @@ func (u *TeamUsecase) GetTeamWithMembers(teamName string) (*domain.Team, []*doma
 
 	return team, members, nil
 }
-

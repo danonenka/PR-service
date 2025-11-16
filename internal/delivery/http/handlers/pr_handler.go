@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"net/http"
+	"time"
+
 	"github.com/danonenka/PR-service/internal/domain"
 	"github.com/danonenka/PR-service/internal/usecase"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -159,7 +160,7 @@ func (h *PRHandler) MergePR(c *gin.Context) {
 
 type ReassignReviewerRequest struct {
 	PullRequestID string `json:"pull_request_id" binding:"required"`
-	OldUserID     string `json:"old_user_id" binding:"required"`
+	OldUserID     string `json:"old_reviewer_id" binding:"required"`
 }
 
 func (h *PRHandler) ReassignReviewer(c *gin.Context) {
@@ -213,6 +214,12 @@ func (h *PRHandler) ReassignReviewer(c *gin.Context) {
 		return
 	}
 
+	// Сохраняем список ревьюеров до переназначения
+	oldReviewerIDs := make(map[string]bool)
+	for _, reviewerID := range pr.ReviewerIDs {
+		oldReviewerIDs[reviewerID] = true
+	}
+
 	err = h.prUsecase.ReassignReviewer(req.PullRequestID, req.OldUserID)
 	if err != nil {
 		if err.Error() == "no available reviewers" {
@@ -244,9 +251,10 @@ func (h *PRHandler) ReassignReviewer(c *gin.Context) {
 		return
 	}
 
+	// Находим нового ревьюера - того, кто есть в новом списке, но не был в старом
 	var newReviewerID string
 	for _, reviewerID := range updatedPR.ReviewerIDs {
-		if reviewerID != req.OldUserID {
+		if !oldReviewerIDs[reviewerID] {
 			newReviewerID = reviewerID
 			break
 		}
